@@ -149,7 +149,7 @@ void XSWidgetCreate(XSWidget *wid) {
 			wid->attributes.event_mask |= table[i].value;
 			
 			fprintf(stderr,
-				"XSWidgetCreate(%s): added %s\b",
+				"XSWidgetCreate(%s): added %s\n",
 				wid->name,table[i].name);
 		} 
 #else

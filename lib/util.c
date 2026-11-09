@@ -144,6 +144,9 @@ void XSConfigure(XSWidget *wid) {
 	XSWidget *aux;
 	int w,h;
 
+	if(wid->geometry.x>=0) wid->geometry.x=wid->event->xconfigure.x;
+	if(wid->geometry.y>=0) wid->geometry.y=wid->event->xconfigure.y;
+
 	wid->width =wid->event->xconfigure.width;
 	wid->height=wid->event->xconfigure.height;
 

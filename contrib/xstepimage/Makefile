@@ -55,12 +55,15 @@
          LIBS = -lxstep -lX11 -lXext -ljpeg -lm
        CFLAGS = $(CPUFLAGS) $(DEFINES) $(INCDIR)
       LDFLAGS = $(LIBDIR) $(LIBS)
-      TARGETS = xstepimage
+      OBJECTS = xstepimage.o
 
-all:: $(TARGETS)
+all:: xstepimage
+
+xstepimage: $(OBJECTS)
+	$(CC) $(OBJECTS) -o xstepimage $(LDFLAGS)
 
 install:: all
-	cp $(TARGETS) /usr/local/bin/
+	cp xstepimage /usr/local/bin/
 
 clean:
-	$(RM) $(TARGETS) core
+	$(RM) $(OBJECTS) xstepimage core

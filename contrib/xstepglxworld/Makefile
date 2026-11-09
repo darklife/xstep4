@@ -51,7 +51,7 @@
 
        PREFIX = /usr/local
        INCDIR = -I/usr/X11R6/include -I$(PREFIX)/include
-       LIBDIR = -L/usr/lib -L/usr/X11R6/lib -L$(PREFIX)/lib 
+       LIBDIR = -L/usr/X11R6/lib -L$(PREFIX)/lib 
          LIBS = -lxstep -lX11 -lXext -lGL -lGLU -lm
        CFLAGS = $(CPUFLAGS) $(DEFINES) $(INCDIR)
       LDFLAGS = $(LIBDIR) $(LIBS)

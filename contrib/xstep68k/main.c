@@ -9,9 +9,8 @@
 #include <mc68901.h>
 #include <misc.h>
 
-#define CPU 		4
+#define CPU 		2
 #define MFP 		2
-#define CACHE 		64
 
 mc68000 *cpu[CPU];
 mc68901 *mfp[MFP];
@@ -22,16 +21,19 @@ void status(int sig) {
 
 	sig=alarm(1);
 
-	print68000(cpu,CPU);
-	print68901(mfp,MFP);
+	fprintf(stderr,"\33[2J\33[H");
+
+	cpu[0]->dump(cpu[0]);
+	cpu[1]->dump(cpu[1]);
 
 	
 }
 
 int main(int argc,char **argv) {
 
-	int i,j,cache;
 	unsigned char *space;
+	unsigned short *code;
+	int i;
 
 	d0=XSDesktop(getenv("DISPLAY"),argv,argc);
 
@@ -41,45 +43,36 @@ int main(int argc,char **argv) {
 	
 	space=(unsigned char *)malloc(ADDRMASK+1);
 
+	code=(unsigned short *)space;
+
+	for(i=8;i<1024;i++) {
+	
+		code[i]=0x3000;
+	}
+
 	cpu[0]=create68000(space);
 	cpu[1]=create68000(space);
-	cpu[2]=create68000(space);
-	cpu[3]=create68000(space);
-
-	mfp[0]=create68901(space,0x800000);
-	mfp[1]=create68901(space,0x810000);
 
 	cpu[0]->halt=0;
 	cpu[1]->halt=1;
 
-	cache=CACHE;
-
 	signal(SIGALRM,status);
 
-	alarm(1);
+	// alarm(1);
 	
-	while(XSCheckEvent(d0,!XS_BLOCK)) {
+	// while(XSCheckEvent(d0,!XS_BLOCK)) {
 
-		for(i=0;i!=CPU;i++) {
+	while(1) {
 
-			if(!cpu[i]->halt) {
+		fprintf(stderr,"\33[H");
 
-				for(j=0;j!=cache;j++) {
+		if(!cpu[0]->halt) {
+		
+			cpu[0]->exec(cpu[0]);
+			cpu[0]->dump(cpu[0]);
 
-					cpu[i]->ucode[*(unsigned short *)(space+(cpu[i]->pc&ADDRMASK))].f(cpu[i]);
-					cpu[i]->ucode[*(unsigned short *)(space+(cpu[i]->pc&ADDRMASK))].f(cpu[i]);
-					cpu[i]->ucode[*(unsigned short *)(space+(cpu[i]->pc&ADDRMASK))].f(cpu[i]);
-					cpu[i]->ucode[*(unsigned short *)(space+(cpu[i]->pc&ADDRMASK))].f(cpu[i]);
-				}
-
-				cpu[i]->count+=(4*cache);	
-			}
 		}
 		
-		for(i=0;i!=MFP;i++) {
-		
-			mfp[i]->count++;
-		}
 	}
 
 	return 0;

@@ -57,9 +57,9 @@ void GLXRedraw(XSWidget *wid) {
 	
 		glTranslatef(glxworld.ix,glxworld.iy,glxworld.iz);
 
-		glRotatef(glxworld.x*z, 1.0, 0.0, 0.0);
+		glRotatef(glxworld.x, 1.0, 0.0, 0.0);
 		glRotatef(glxworld.y, 0.0, 1.0, 0.0);
-		glRotatef(glxworld.z*z, 0.0, 0.0, 1.0);
+		glRotatef(glxworld.z, 0.0, 0.0, 1.0);
 
 		glCallList(aux->glxlint);
 
@@ -163,19 +163,20 @@ void GLXCreate(XSWidget *wid) {
 */
 	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
 
-	glMaterialfv(GL_FRONT, GL_SPECULAR, MaterialSpecular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, MaterialShininess);
+//	glMaterialfv(GL_FRONT, GL_SPECULAR, MaterialSpecular);
+//	glMaterialfv(GL_FRONT, GL_SHININESS, MaterialShininess);
 
 //	glClearColor(0.0,0.0,0.5,1.0);
+
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_NORMALIZE);
+	//glEnable(GL_CULL_FACE);
 	glShadeModel(GL_SMOOTH);
 
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT,GL_FILL);
 
         glEnable(GL_LINE_SMOOTH);
@@ -198,6 +199,7 @@ void GLXCreate(XSWidget *wid) {
 		glMaterialfv(GL_FRONT,GL_SPECULAR,specularity);
 		glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,color);
 		glMateriali(GL_FRONT,GL_SHININESS,materialspec);
+
 //		glLightModelfv(GL_LIGHT_MODEL_AMBIENT,LightAmbient);
 
 		for(x=0;x!=aux->psize;x++) {
@@ -241,6 +243,7 @@ void GLXCreate(XSWidget *wid) {
 			// object
 
 			glBegin(GL_TRIANGLE_FAN);
+			
 			glNormal3f(nx,ny,nz);
 			glColor3f(1,0,0); 
 			
@@ -259,6 +262,8 @@ void GLXCreate(XSWidget *wid) {
 			}
 			
 			glEnd();
+
+// line
 /*
 			cx=cx/(float)y;
 			cy=cy/(float)y;

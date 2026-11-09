@@ -1,351 +1,214 @@
-#include <sys/time.h>
+#include <stdio.h>
+#include <xstep.h>
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <X11/extensions/Xvlib.h>
+
 #include <stdlib.h>
-#include <string.h>
-#include <asm/types.h>
-#include <linux/videodev.h>
-#include <sys/mman.h>
-#include <sys/ioctl.h>
-#include <asm/types.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <pthread.h> 
-#include <quicktime.h>
-#include <colormodels.h>
+#include <stdio.h>
 
-#include "xstep.h"
+Atom 		encodingAtom;
+XvAdaptorInfo 	*adaptors;
+XvEncodingInfo 	*encodings;
+XSWidget 	*desktop,
+		*pop,
+		*xv;
 
-XSWidget 		*desktop;
-XSWidget		*window;
-XSWidget		*control;
-XSPixmap 		*pixmap;
-XSImage			*ximage[2],
-			*xalpha;
+struct XVTree {
 
-struct video_buffer	 grab_set;
-struct video_capability  grab_cap;
-struct video_channel     grab_vid; 
-struct video_mmap        grab_buf[2];
-struct video_mbuf	 grab_mbuf;
-int                      grab_fd,
-			 grab_size;
-unsigned char           *grab_data;
+	char 	*sdevice,
+		*schannel;
 
-int 			 width =512,
-			 height=384,
-			 invert,
-			 count,
-			 channel=1,
-			 frame,
-			 colorize,
-			 intensify,
-			 interlock;
-
-struct timeval		 t0,t1;
-struct timezone		 tz;
-float 			 gamma=0.0,zoom=1.0;
-char 			*display,*alpha,*output,*quicktimef;
-char			**channels;
-int			tt,cc,**video;
-
-quicktime_t		 *quick;
-
-void updatef(XSWidget *wid) {
-
-	float diff;
-	unsigned 	size,x,y;
-	char 		*d,*s,*s1,*s2;
-
-	interlock=!interlock;
-
-	grab_buf[interlock].format = VIDEO_PALETTE_RGB24;
-
-	if(grab_vid.channel!=channel) {
-
-		grab_vid.channel=channel;
-
-		if (-1 == ioctl(grab_fd,VIDIOCSCHAN,&grab_vid)) {
-
-			perror ("VIDIOCSCHAN");
-			return;
-		}
-	}
-
-	if(ioctl(grab_fd,VIDIOCMCAPTURE,&grab_buf[interlock]))
-		perror("VIDIOCMCAPTURE");
-
-	if(ioctl(grab_fd,VIDIOCSYNC,&grab_buf[!interlock]))
-		perror("VIDIOCSYNC");
-
-/*
-	if(gamma) 	XSImageGamma	(ximage[!interlock],gamma);
-	if(colorize) 	XSImageColorize	(ximage[!interlock]);
-	if(invert) 	XSImageInvert	(ximage[!interlock]);
-	if(intensify) 	XSImageIntensify(ximage[!interlock]);
-	if(alpha) 	XSImageBlend	(xalpha,ximage[!interlock]);
-*/
-	if(!quicktimef || !cc) {
-	
-		XSImage2Pixmap(wid,ximage[!interlock],pixmap,False);
-		XClearWindow(wid->display,window->window);
-//		XFlush(wid->display);
-	}
-
-	frame++;
-
-	cc++;
-
-	if(tt!=time(0)) {
-	
-		printf("rate = %d fps\n",cc);
+	int 	device,
+		channel,
+		width,
+		height;
 		
-		cc=0;
-		tt=time(0);
+	struct XVTree *next;
 
-//		if(output) SaveXSImageToJPEG(ximage[!interlock],output);
-	}
+} *xvtree,*xvaux;
+
+int active,device,channel,width=800,height=600,pchannel,lchannel;
+
+char **channels;
+
+void xvChange(XSWidget *wid) {
+
+	int a;
+
+	if(pchannel==lchannel) return;
+
+	for(a=0,xvaux=xvtree;xvaux;xvaux=xvaux->next,a++)
 	
-	if(quicktimef) quicktime_encode_video(quick,video,0);
+		if(a==pchannel) {
+	
+			wid=xv;
+	
+			if(active) XvStopVideo(wid->display,device,wid->window);
+	
+			device=xvaux->device;
+			channel=xvaux->channel;
+	
+			XvSetPortAttribute(wid->display,device,encodingAtom,channel);
+			XvPutVideo(wid->display,device,wid->window,wid->gc,
+				0,0,width,height,
+				0,0,width,height);
+
+			active=1;
+	
+			lchannel=pchannel;
+		}
 }
 
-void videocreatef(XSWidget *wid) {
+void xvCreate(XSWidget *wid) {
 
-	int i,y;
-
-        if (-1 == (grab_fd = open("/dev/video0",O_RDWR))) {
-
-                perror("OPEN");
-                return;
-        }
-
-        if (-1 == ioctl(grab_fd,VIDIOCGCAP,&grab_cap)) {
-
-		perror("VIDIOCGCAP");
-                return;
-        }
-
-	printf( "detected device [%s]:\n"
-		"  %d device type\n"
-		"  %d video channels\n"
-		"  %d audio channels\n"
-		"  %dx%d upto %dx%d pixels\n",
-		
-		grab_cap.name,
-		grab_cap.type,
-		grab_cap.channels,
-		grab_cap.audios,
-		grab_cap.minwidth,
-		grab_cap.minheight,
-		grab_cap.maxwidth,
-		grab_cap.maxheight);
-
-	channels=(char **)malloc(sizeof(char *)*grab_cap.channels);
-	
-	for(i=0;i!=grab_cap.channels;i++) {
-	
-		channels[i]=(char *)malloc(strlen("Video Channel 0"+1));
-		sprintf(channels[i],"Video Channel %d",i);
-	}
-
-	grab_vid.channel=channel;		/* entrada */
-	grab_vid.type = VIDEO_TYPE_TV; 	/* camera, nao tuner */
-	grab_vid.norm = 1;			/* NTSC */
-
-	if (-1 == ioctl(grab_fd,VIDIOCSCHAN,&grab_vid)) {
-
-		perror ("VIDIOCSCHAN");
-		return;
-
-	} else printf("VIDIOCSCHAN: ok\n");
-
-	grab_buf[0].format 	= VIDEO_PALETTE_RGB24;
-        grab_buf[0].frame  	= 0;
-        grab_buf[0].width  	= width;
-        grab_buf[0].height 	= height;
-
-	grab_buf[1].format 	= VIDEO_PALETTE_RGB24;
-        grab_buf[1].frame  	= 1;
-        grab_buf[1].width  	= width;
-        grab_buf[1].height 	= height;
-
-        grab_size 		= width*height*3;
-
-	grab_mbuf.size 		= grab_size*2;
-	grab_mbuf.frames 	= 2;
-	grab_mbuf.offsets[0]	= 0;
-	grab_mbuf.offsets[1]	= grab_size;
-	
-	if (-1 == ioctl (grab_fd,VIDIOCGMBUF,&grab_mbuf)) {
-
-		perror ("VIDIOCGMBUF");
-		return;
-
-	} else printf("VIDIOCGMBUF: ok\n");
-
-	grab_data = mmap(0,
-			grab_mbuf.size,
-			PROT_READ|PROT_WRITE,
-			MAP_SHARED,
-			grab_fd,0);
-
-	if(!grab_data) {
-	
-		perror ("MMAP");
-		return;
-
-	} else printf("MMAP: ok\n");
-
-	wid->on.change=updatef;
-
-	ximage[0] = XSImageCreate(width,height,grab_data+grab_mbuf.offsets[0],XS_IMAGE_BGR24);
-	ximage[1] = XSImageCreate(width,height,grab_data+grab_mbuf.offsets[1],XS_IMAGE_BGR24);
-
-	if(quicktimef) {
-	
-		printf("output quicktime file: %s\n",quicktimef);
-		quick = quicktime_open(quicktimef, 0, 1);
-
-		quicktime_set_video(quick,1,width,height,10,QUICKTIME_YUV4);
-		quicktime_set_jpeg(quick,30,False);
-
-		if(!quicktime_supported_video(quick,0)) 
-			printf("failed! can't encode quicktime!\n");
-		
-        	video=(int **)malloc(sizeof(int *)*height);
-        	
-                for(y=0;y!=height;y++) 
-                	video[y]=(int *)malloc(sizeof(int)*width);
-	}
+	wid->bgcolor=wid->black;
 
 	XSWidgetCreate(wid);
 
-	pixmap = XSPixmapCreate(wid,
-		zoom?width*zoom:width,
-		zoom?height*zoom:height,
-		NULL,
-		XS_PIXMAP_XSHM);
-
-	XSetWindowBackgroundPixmap(wid->display,wid->window,pixmap->pixmap);
+//	XvSetPortAttribute(wid->display,device,encodingAtom,channel);
+//	XvPutVideo(wid->display,device,wid->window,wid->gc,
+//		0,0,width,height,
+//		0,0,width,height);
 }
 
-void savef(XSWidget *wid) {
+void xvGrab(XSWidget *wid) {
 
-	char buffer[256];
+	XImage 		*pix;
+	unsigned short 	*wptr;
+	unsigned char	*iptr,data[width*height*3];
+	int 		i,j;
+	FILE 		*fp;
+	char 		filename[256];
+
+	XvStopVideo(xv->display,device,xv->window);
+
+	pix=XGetImage(xv->display,xv->window,0,0,640,480,0xffffff,ZPixmap);
+
+	XvPutVideo(xv->display,device,xv->window,xv->gc,
+		0,0,width,height,
+		0,0,width,height);
+
+	wptr=(unsigned short *)pix->data;
+	iptr=data;
+
+	for(j=i=640*480;i--;wptr++) {
 	
-	(void)wid;
+		*iptr++ = *wptr>>8;
+		*iptr++ = (*wptr&0x7e0)>>3;
+		*iptr++ = *wptr<<3;
+	}
+
+	sprintf(filename,"video-%ld.ppm",time(0));
+
+	fp=fopen(filename,"w");
 	
-	sprintf(buffer,"xvideo-%lx.%d.jpg",time(0),frame);
-//	SaveXSImageToJPEG(ximage[!interlock],buffer);
+	fprintf(fp,"P6\n%d %d\n%d\n",640,480,255);	
+
+	fwrite(data,j,3,fp);
+
+	fprintf(stderr,"grabbed image RGB=(%x,%x,%x): %s\n",
+		XSNamedColor(xv,"red"),
+		XSNamedColor(xv,"green"),
+		XSNamedColor(xv,"blue"),
+		filename);
+
+	fclose(fp);
 }
 
 int main(int argc,char **argv) {
 
-	int i,y;
-
-	/* initialize application */
-
-	display=getenv("DISPLAY");
-
-	for(i=0;i!=argc;i++) {
+	int version, release, a, b, c, d, n;
 	
-		if(!strcmp(argv[i],"-gamma")&&i+1!=argc)
-			gamma=atof(argv[i+1]);
+	XvAttribute 	*at;
 
-		if(!strcmp(argv[i],"-channel")&&i+1!=argc)
-			channel=atoi(argv[i+1]);
+	desktop=XSDesktop(":0",argv,argc);
 
-		if(!strcmp(argv[i],"-display")&&i+1!=argc)
-			display=argv[i+1];
+	if(XvQueryExtension(desktop->display,&version,&release,&a,&b,&c)!=Success)
+		exit(fprintf(stderr,"X Video Extension not available here!\n"));
+ 
+	fprintf(stderr,"detected xVideo Extension V%dR%d:\n",version,release);
 
-		if(!strcmp(argv[i],"-output")&&i+1!=argc)
-			output=argv[i+1];
+	XvQueryAdaptors(desktop->display,desktop->window,&n,&adaptors);
 
-		if(!strcmp(argv[i],"-quicktime")&&i+1!=argc)
-			quicktimef=argv[i+1];
+	for(d=a=0;a!=n;a++) {
 
-		if(!strcmp(argv[i],"-invert"))
-			invert=True;
-
-		if(!strcmp(argv[i],"-alpha"))
-			alpha=argv[i+1];
-
-		if(!strcmp(argv[i],"-zoom"))
-			zoom=atof(argv[i+1]);
-
-		if(!strcmp(argv[i],"-colorize"))
-			colorize=True;
-
-		if(!strcmp(argv[i],"-intensify"))
-			intensify=True;
-
-		if(!strcmp(argv[i],"-size")&&i+1!=argc) {
-
-			width=atoi(argv[i+1]);
-			
-			if(strchr(argv[i+1],'x')) 
-				height=atoi(strchr(argv[i+1],'x')+1);
-			else
-				height=(width*3)/4;
-		}
-	} 
-
-	if(output) printf("output file: %s\n",output);
-
-	/* create xstep objects: desktop, pixmap, window, buttons */
-
-	desktop = XSDesktop(display,argv,argc);
+		fprintf(stderr,"  device %ld: %s type={ %s%s%s%s%s}, ports=%ld\n",
+			adaptors[a].base_id,
+			adaptors[a].name,
+			adaptors[a].type&XvInputMask ?"Input " :"",
+			adaptors[a].type&XvOutputMask?"Output ":"",
+			adaptors[a].type&XvVideoMask ?"Video " :"",
+			adaptors[a].type&XvStillMask ?"Still " :"",
+			adaptors[a].type&XvImageMask ?"Image " :"",
+			adaptors[a].num_ports);		
+	
+		if(!(adaptors[a].type&XvVideoMask)) continue;
+	
+		XvQueryEncodings(desktop->display, adaptors[a].base_id, &c, &encodings);
 		
-	if(!desktop) return -1;
+		for(b=0;b!=c;b++,d++) {
 
-	fprintf(stderr,"%s: desktop %x, size %dx%d, depth %d\n",
-		argv[0],
-		(int)desktop,
-		desktop->width,
-		desktop->height,
-		desktop->depth);
+			fprintf(stderr,"    channel %ld: %s (%ldx%ld)\n",
+				encodings[b].encoding_id,
+				encodings[b].name,
+				encodings[b].width,
+				encodings[b].height);
+		
+			if(b==0) {
+			
+				channel=encodings[b].encoding_id;
+				device=adaptors[a].base_id;
+			}
+		
+			xvaux		=(struct XVTree *)malloc(sizeof(struct XVTree));
+			
+			xvaux->sdevice	=strdup(adaptors[a].name);
+			xvaux->schannel	=strdup(encodings[b].name);
+			xvaux->device	=adaptors[a].base_id;
+			xvaux->channel	=encodings[b].encoding_id;
+			xvaux->width	=encodings[b].width;
+			xvaux->height	=encodings[b].height;
+			xvaux->next	=xvtree;
+			
+			xvtree=xvaux;
+		}
 
-	control = XSWindow(desktop,
-		0,0,
-		width*zoom+28+152,
-		height*zoom+20,
-		"xvideo");
+		at=XvQueryPortAttributes(desktop->display,adaptors[a].base_id,&c);
 
-//	XSPopup(control,-8,8+21*0,152,21,channels,&channel);
+		for(b=0;b!=c;b++) {
+	
+			fprintf(stderr,"    attribute %s: min/max=(%d/%d), %s%s\n",
+				at[b].name,
+				at[b].min_value,
+				at[b].max_value,
+				(at[b].flags & XvGettable) ? "R" : "",
+				(at[b].flags & XvSettable) ? "W" : "");
+		}
+	}
 
-	XSCheck(control,-8,8+21*2,152,21,"Intensify (IR)",&intensify,1);
-	XSCheck(control,-8,8+21*3,152,21,"Colorize (IR)",&colorize,1);
-	XSCheck(control,-8,8+21*4,152,21,"Invert",&invert,1);
+	encodingAtom = XInternAtom(desktop->display, "XV_ENCODING", False);
 
-	XSButton(control,-88,-8,72,24,"Grab",savef);
-	XSButton(control, -8,-8,72,24,"Quit",XSWindowClose);
+	channels=(char **)malloc(sizeof(char *)*(d+1));
 
-	window = XSWindow(control,
-		10,10,
-		width*zoom,
-		height*zoom,
-		"xvideo.image");
+	for(a=0,xvaux=xvtree;xvaux;xvaux=xvaux->next,a++) 
+		channels[a]=xvaux->schannel;
 
-	window->on.create=videocreatef;
+	channels[a]=NULL;
 
-	XSLabel(control,
-		8,8,
-		width*zoom+4,
-		height*zoom+4,
-		"xvideo.label",
-		XS_BOX_DOWN);
+	fprintf(stderr,"xVideo ready...starting graphic sub-system...\n");
 
-//	if(alpha) 
-//		xalpha = XSCreateImageFromFile(alpha);
+	xv=XSWindow(desktop,0,0,width,height+40,"XSTEPVideo!");
+	xv->on.create=xvCreate;
 
-	/* main loop */
+	XSButton(xv,-8  ,-8,72,24,"Quit",XSWindowClose);
+	XSButton(xv,-88 ,-8,72,24,"Grab",xvGrab);
 
-	while(XSCheckEvent(desktop,XS_NOBLOCK));
+	XSPopup(xv,8,-8,160,21,channels,&pchannel);
+	XSButton(xv,176,-8,72,24,"Change",xvChange);
 
-	if(quick) quicktime_close(quick);
+	while(XSCheckEvent(desktop,!XS_BLOCK)) usleep(1);
 
 	return 0;
 }

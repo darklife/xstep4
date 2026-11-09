@@ -233,6 +233,7 @@ void XSScrollOnChange(XSWidget *wid) {
 	if(!wid->status) return;
 
 	usleep(1);
+	usleep(1);
 
 	switch(wid->status) {
 

@@ -52,12 +52,14 @@
        PREFIX = /usr/local
        INCDIR = -I/usr/X11R6/include -I$(PREFIX)/include
        LIBDIR = -L/usr/X11R6/lib -L$(PREFIX)/lib 
-         LIBS = -lxstep -lX11 -lXext -lm -lquicktime -lpng -lpthread -ldl -lglib
+	LIBS = -lxstep -lX11 -lXext
+#         LIBS = -lxstep -lX11 -lXext -lm -lquicktime -lpng -lpthread -ldl -lglib
        CFLAGS = $(CPUFLAGS) $(DEFINES) $(INCDIR)
       LDFLAGS = $(LIBDIR) $(LIBS)
-      TARGETS = xstepvideo
+      TARGETS = xstepvideo.o
 
 all:: $(TARGETS)
+	$(CC) $(CFLAGS) -o xstepvideo $(TARGETS) /usr/X11R6/lib/libXv.a $(LDFLAGS)
 
 clean:
-	$(RM) $(TARGETS) core
+	$(RM) $(TARGETS) xstepvideo core

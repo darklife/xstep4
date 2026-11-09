@@ -33,8 +33,8 @@ int                      video_fd,
 			 video_size;
 unsigned char           *video_data;
 
-int 			 width =512,
-			 height=384,
+int 			 width =640,
+			 height=480,
 			 invert,
 			 count,
 			 channel=1,
@@ -106,7 +106,7 @@ void updatef(XSWidget *wid) {
 		}		
 	}
 	
-	XClearWindow(wid->display,window->window);
+	if(interlock) XClearWindow(wid->display,window->window);
 
 //	XFlush(wid->display);
 
@@ -136,7 +136,7 @@ void updatef(XSWidget *wid) {
 
 		sprintf(sfrequency,"%.6f MHz",(frequency/16.0));
 	
-		printf("frequency=%.6f MHz, rate=%d fps\n",(frequency/16.0),frame);
+		// printf("frequency=%.6f MHz, rate=%d fps\n",(frequency/16.0),frame);
 		frame=0;
 		reference=time(0);
 	}
@@ -259,7 +259,7 @@ void videocreatef(XSWidget *wid) {
 
 	XSWidgetCreate(wid);
 
-	XSPopup(control,8,-(8+24),100,21,channels,&channel);	
+	XSPopup(control,8,-8,100,21,channels,&channel);	
 
 	video_tuner.tuner=0;
 
@@ -291,9 +291,9 @@ void videocreatef(XSWidget *wid) {
 
 		printf("  signal=%d\n",video_tuner.signal);
 
-		XSTune(control,116+100,-(8+24),32*16,500*16,&frequency);
-		XSLabel(control,116,-(8+24),100,21,sfrequency,XS_BOX_DOWN);
-		XSButton(control,-88,-8,72,24,"Scan",scanff);
+		//XSTune(control,116+100,-(8+24),32*16,500*16,&frequency);
+		//XSLabel(control,116,-(8+24),100,21,sfrequency,XS_BOX_DOWN);
+		//XSButton(control,-88,-8,72,24,"Scan",scanff);
 	}
 }
 
@@ -341,26 +341,22 @@ int main(int argc,char **argv) {
 
 	control = XSWindow(desktop,
 		0,0,
-		width+20,
-		height+16+20+24,
+		width,
+		height+16+24,
 		"xstepTV");
+
+//	control->bgcolor = window->black;
+//	control->fgcolor = window->white;
 
 	XSButton(control, -8,-8,72,24,"Quit",XSWindowClose);
 
 	window = XSWindow(control,
-		10,10,
+		0,0,
 		width,
 		height,
 		"xstepTV.image");
 
 	window->on.create=videocreatef;
-
-        XSLabel(control,
-                8,8,
-                width+4,
-                height+4,
-                "xvideo.label",
-                XS_BOX_DOWN);
 
 	while(desktop->child) XSCheckEvent(desktop,XS_NOBLOCK);
 

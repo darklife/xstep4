@@ -144,10 +144,10 @@ void GLXCreate(XSWidget *wid) {
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);
-	glEnable(GL_POLYGON_SMOOTH);
+//	glEnable(GL_POLYGON_SMOOTH);
 
 	glEnable(GL_LINE_SMOOTH);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
 	glxworld.x=-94;
@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
 
 	desktop = XSDesktop(getenv("DISPLAY"),argv,argc);
 	window  = XSWindow(desktop,0,0,640,480,"3D/GLX Application w/ XSTEP");
-	          XSButton(window,-8,-8,72,24,"Quit",XSWindowClose);
+		  XSButton(window,-8,-8,72,24,"Quit",XSWindowClose);
 
 	window->on.event[ConfigureNotify] 	= GLXResize;
 	window->on.event[KeyPress]		= GLXKeyPress;
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
 	window->on.create			= GLXCreate;
 	window->on.change			= GLXRedraw;
 
-	while(XSCheckEvent(desktop,XS_NOBLOCK));
+	while(1) XSCheckEvent(desktop,XS_NOBLOCK);
 
 	return 0;
 }

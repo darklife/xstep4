@@ -65,7 +65,7 @@
 
        DEFINES=-DXSHM
       CPUFLAGS=-O6 -funroll-loops -fomit-frame-pointer -mpentium -pipe
-#     CPUFLAGS=-O6 -funroll-loops -fomit-frame-pointer -m68040   -pipe
+#     CPUFLAGS=-O6 -funroll-loops -fomit-frame-pointer -m68030 -pipe
 
 # misc section:
 # 
@@ -79,7 +79,7 @@
        LDFLAGS=$(LIBDIR) $(LIBS)
        LIBNAME=libxstep
        VERSION=4
-       RELEASE=0
+       RELEASE=1
        TARGETS=$(LIBNAME).so.$(VERSION).$(RELEASE) $(LIBNAME).a
        OBJECTS=desktop.o util.o window.o tree.o button.o dialog.o edit.o \
       		label.o check.o radio.o scroll.o widget.o popup.o menu.o \

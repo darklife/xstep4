@@ -31,7 +31,7 @@ void XSMPEGUpdate(XSWidget *wid) {
       
 	if(GetMPEGFrame(ximage->data)) {
 
-		XSImage2Pixmap(window,ximage,pixmap,False);
+		XSImage2PixmapAA(window,ximage,pixmap,False);
 		XClearWindow(desktop->display,window->window);
 		XFlush(desktop->display);
 

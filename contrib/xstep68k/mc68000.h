@@ -66,7 +66,9 @@ typedef struct mc68000 {
 
 	} ucode[65536];
 
+	void (*exec)(struct mc68000 *);
+	void (*dump)(struct mc68000 *);
+
 } mc68000;
 
 mc68000	*create68000(unsigned char *space);
-void 	print68000(mc68000 **,int);
