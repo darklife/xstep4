@@ -1,0 +1,98 @@
+<html>
+<body bgcolor=white>
+<h1>XSPixmap, XSPixmapCreate, XSPixmapCreateXPM, XSPixmapCreateXPMF</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	pix=XSPixmapCreate(wid,w,h,data,type)
+	pix=XSPixmapCreateXPM(wid,xpm);
+	pix=XSPixmapCreateXPMF(wid,filename);
+
+	<b>XSWidget</b> *wid;
+	<b>XSPixmap</b> *pix;
+	int w,h,type;
+	unsigned char *data,*filename;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+	<p><b>XSWidget</b> is a typedef to a complex struct of private and
+	public variables and describe a stack of pixmaps linked to a
+	specific window:
+
+	<pre>
+	pix->width		image width in pixels
+	pix->height		image height in pixels
+	pix->name		image name
+	pix->type		image type
+	pix->pixmap		image handler in the server side
+	pix->image		image handler in the client side
+	pix->gc			image GC in the server side
+	</pre>
+
+	<p>You can't create a pixmap linked in a uncreated widget.
+
+	<p>XSPixmap objects can be created with XSPixmapCreate,
+	XSPixmapCreateXPM or XSPixmapCreateXPMF. XSPixmapCreate will create
+	a new client/server linked image. The image type can be
+	XS_PIXMAP_XSHM (for fast XSHM extension) or XS_PIXMAP_DEFAULT. If
+	you will use XSHM, the data buffer must be NULL (a new data buffer
+	will be created and will be shared). XSPixmapCreateXPM and
+	XSPixmapCreateXPMF will create a XSPixmap from a XPM image.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include <xstep.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+XSPixmap *pixmap;
+
+void w1onchange(XSWidget *wid) {
+
+	static int x=100,y=100,incx=3,incy=3;
+
+	XCopyArea(wid->display,
+		pixmap->pixmap,wid->window,wid->gc,
+		0,0,
+		pixmap->width,pixmap->height,
+		x,y);
+
+	x+=incx;
+	y+=incy;
+	
+	if(x+pixmap->width>wid->width)   incx=-rand()%6;
+	if(y+pixmap->height>wid->height) incy=-rand()%6;	
+
+	if(x<=0) incx=rand()%6;
+	if(y<=0) incy=rand()%6;
+}
+
+void w1oncreate(XSWidget *wid) {
+	
+	XSWidgetCreate(wid);
+	
+	pixmap=XSPixmapCreateXPMF(wid,"../pictures/pixmap.xpm.gz");
+}
+
+int main(int argc,char **argv) {
+
+	XSWidget *d1,*w1;
+
+	d1=XSDesktop(getenv("DISPLAY"),argv,argc);
+	w1=XSWindow(d1,0,0,640,480,"pixmap");
+           XSButton(w1,-8,-8,72,24,"Close",XSWindowClose);
+
+	w1->on.create=w1oncreate;
+	w1->on.change=w1onchange;
+	
+	while(XSCheckEvent(d1,!XS_BLOCK)) usleep(1);
+
+	return 0;
+}

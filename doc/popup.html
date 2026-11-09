@@ -1,0 +1,63 @@
+<html>
+<body bgcolor=white>
+<h1>XSPopup</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSPopup</b>(parent,x,y,width,height,list,pointer)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int  x,y,width,height,*pointer;
+	char **list;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSPopup</b> create a popup widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with size
+	<b>width,height</b>. When you click in this widget, a popup menu
+	will be open with options defined in the <b>list</b> and the
+	index of selected item will be stored in <b>*pointer</b>. 
+	The list <b>list</b> must be a NULL terminated array of pointers to
+	C strings. Only integer values are supported and will range from 0
+	to your desktop height/21 (by this time).
+
+        <p>All operations of <b>XSPopup</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+#include &lt;stdio.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+	int pointer=0;
+	
+	char *list[]={
+
+		"68000",
+		"68010",
+		"68020",
+		"68030",
+		"68040",
+		"68060",
+		NULL,
+	};
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"popup example");
+	   <b>XSPopup</b>(w1,8,8,200,21,list,&pointer);
+	   <a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK))
+		printf("pointer %d: %s\n",pointer,list[pointer]);
+
+	return 0;
+}

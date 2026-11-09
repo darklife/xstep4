@@ -1,0 +1,55 @@
+<html>
+<body bgcolor=white>
+<h1>XSWindow, XSWindowClose</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	wid=<b>XSWindow</b>(parent,x,y,width,height,name)
+
+	<a href="widget.html">XSWidget</a> *wid,*parent;
+	int x,y,width,height;
+	char *name;
+
+	void <b>XSWindowClose</b>(wid);
+	
+	<a href="widget.html">XSWidget</a> wid;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+	<p><b>XSWindow</b> create a new window in the selected
+	<b>parent</b>, in the position <b>x,y</b> with size
+	<b>width,height</b>.  If <b>parent</b> widget is the desktop, a
+	decorative title bar will be drawed by the active window manager of
+	this screen and the <b>name</b> of window will be placed in the
+	title bar.
+
+	<p><b>XSWindowClose</b> destroy a selected window.
+
+	<p>All operations of <b>XSWindow</b> and <b>XSWindowClose</b> in the
+	X server are delayed until <b><a href="event.html">XSCheckEvent</a></b>
+	is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<b>XSWindow</b>(d1,0,0,400,400,"window example");
+	
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<b>XSWindowClose</b>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK));
+
+	return 0;
+}
+

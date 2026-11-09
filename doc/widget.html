@@ -1,0 +1,96 @@
+<html>
+<body bgcolor=white>
+<h1>XSWidget</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	<b>XSWidget</b> *wid;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+	<p><b>XSWidget</b> is a typedef to a complex struct of private and
+	public variables and describe a hierarchical tree of widgets to
+	XSTEP toolkit. All widgets are liked to X server screens or windows
+	and a complet set of X informations are available:
+
+	<pre>
+	wid->display		X display pointer
+	wid->screen		X screen number
+	wid->window		X window id
+	wid->gc			X graphic context id
+	wid->width		width of window
+	wid->height		height of window
+	wid->font		font of graphic context
+	wid->fgcolor		foreground color of graphic context
+	wid->bgcolor		background color of graphic context and window
+	wid->name		text name of widget
+	wid->type		XSTEP id of widget
+	wid->depth		depth of window
+	wid->event		global event information of display
+	wid->pixmap		stack of pixmaps (see <a href="pixmap.html">XSPixmap</a>)
+	wid->text		stack of texts (see <a href="text.html">XSText</a>)
+	wid->global		display informations (see <a href="global.html">XSGlobal</a>)
+	wid->status		widget status
+	</pre>
+	
+	<p>All <b>XSWidgets</b> are in widget stacks. These stacks are
+	linked in the child pointer of screens and windows, you can scan the
+	widget tree in any direction:
+
+	<pre>
+	wid->desktop		screen when this widget is mapped
+	wid->parent		parent widget
+	wid->child		child widget stack
+	wid->next		next widget in the stack
+	wid->last		last widget in the stack
+	wid->group		widget group leader of application
+	wid->viewport		viewport of scroll widget
+	</pre>
+
+	<p>All stacks are NULL terminated.
+
+	<p>Any <b>XSWidget</b> will reflect the color information available in the
+	screen. A white pixel and black pixel will exist in any screen, gray
+	and darkgray pixels will exist in 4-bit or better screens and a
+	fixed colormap will be available in 8-bit screens: 
+
+	<pre>
+	wid->colormap 		fixed colormap for 8 bit screens 
+	wid->white white	pixel of screen 
+	wid->black 		black pixel of screen 
+	wid->gray 		gray pixel of screen 
+	wid->darkgray 		darkgray pixel of screen 
+	</pre> 
+
+	<p>Any color can be selected with XSTEP auxiliar functions <a
+	href="color.html">XSColor</a> (recommended) and <a
+	href="color.html">XSNamedColor</a> or any X color function.
+
+	<p>A basic set of fonts is available:
+
+	<pre>
+	wid->helvetica12m	helvetica-medium size 12
+	wid->helvetica12b	helvetica-bold size 12
+	wid->helvetica24b	helvetica-bold size 24
+	wid->courier12m		fixed width, courier-medium size 12
+	</pre>
+
+	<p>For normal applications, Helvetica-medium-12 is the default font, 
+	for special texts, Helvetica-bold-12 and for big texts
+	Helvetica-bold-24. In special situations a fixed width font can be
+	used and Courier-medium-12 is available. You can select any other
+	font from your X server with XLoadQueryFont():
+
+	<pre>
+	<b>XSWidget</b> *d;
+		
+	d=<a href="desktop.html">XSDesktop</a>(":0",argv,argc);
+	d->font=XLoadQueryFont(d->display,"-*-avalon-medium-r-*-*-12-*-*-*-*-*-*-*");
+	</pre>
+
+	<p>All XSWidgets can have callback functions actived by X server
+	events, see <a href="event.html">XSCheckEvent</a> for more detail.
+
+</blockquote>

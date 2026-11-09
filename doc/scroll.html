@@ -1,0 +1,61 @@
+<html>
+<body bgcolor=white>
+<h1>XSScroll</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	wid=<b>XSScroll</b>(parent,x,y,width,height,subwidth,subheight)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int x,y,width,height,subwidth,subheight;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSScroll</b> create a button widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with size
+        <b>width,height</b> with a scrolled sub-window inside with size
+	<b>subwidth,subheight</b>. This sub-window is a standard <a
+	href="window.html">XSWindow</a> and can be used by any other widget.
+
+        <p>All operations of <b>XSScroll</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+
+void viewportexposef(<a href="widget.html">XSWidget</a> *wid) {
+
+	XDrawLine(wid->display,wid->window,wid->gc,
+		8,8,wid->width-8,wid->height-8);
+
+	XDrawLine(wid->display,wid->window,wid->gc,
+		8,wid->height-8,wid->width-8,8);
+
+	XDrawArc(wid->display,wid->window,wid->gc,
+		8,8,wid->width-16,wid->height-16,
+		0,360*64);
+}
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1,*w2;
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"scroll example");
+
+	w2=<b>XSScroll</b>(w1,8,8,-8,-40,800,800);
+	w2->viewport->on.event[Expose]=viewportexposef;
+
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK));
+
+	return 0;
+}

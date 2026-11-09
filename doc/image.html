@@ -1,0 +1,160 @@
+<html>
+<body bgcolor=white>
+<h1>XSImage, XSImageCreate, XSImageDestroy, XSImage2Pixmap</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	img=<b>XSImageCreate</b>(x,y,data,format);
+	<b>XSImage2Pixmap(wid,img,pix,operation);
+	<b>XSImageCreate</b>(img);
+
+	<b>XSImage</b>  *img;
+	<b>XSPixmap</b> *pix;
+	<b>XSWidget</b> *wid;
+	int 		x,y,format,operation;
+	unsigned char 	*data;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+	<p><b>XSImage</b> is a typedef to a complex struct of private and
+	public variables and describe a bitmapped color or grayscale imagem,
+	with data organization independent of screen:
+
+	<pre>
+	img->name		string with image name
+	img->width		image width in pixels
+	img->height		image height in pixels
+	img->channels		number of color channels
+	img->format		image format
+	img->data		pointer to image buffer with size width*height*channels
+	img->filter		pointer to a list of filters.
+	</pre>
+
+	<p>Valid image formats are:
+
+	<pre>
+	XS_IMAGE_RGB24		24 bit color image (big-endian RGB)
+	XS_IMAGE_BGR24		24 bit color image (litle-endian RGB)
+	XS_IMAGE_RGB32		32 bit color image (big-endian, with alpha)
+	XS_IMAGE_CMYK		32 bit color image (color complement)
+	XS_IMAGE_GRAY		8 bit grayscale 
+	</pre>
+
+	<p>The number of channels is 1 for XS_IMAGE_GRAY, 3 for
+	XS_IMAGE_RGB24 and XS_IMAGE_BGR24 and 4 for XS_IMAGE_ARGB32 and
+	XS_IMAGE_CMYK.
+
+	<p>For any color channel, you must have a level table linked in the
+	filter pointer. For example, XS_IMAGE_RGB24 is a three channel
+	image format, then you have three level tables in the filter list:
+
+	<pre>
+	img->filter[0]		is the level table for R channel
+	img->filter[1]		is the level table for G channel	
+	img->filter[2]		is the level table for B channel
+	</pre>
+
+	<p>All XSImage objects must be created by XSImageCreate and
+	destroyed by XSImageDestroy. A XSImage object can be converted to a
+	XSPixmap object with XSImage2Pixmap function.
+
+	<p><b>XSImage2Pixmap</b> will convert the device independent bitmap
+	stored in a XSImage object to a device dependent XSPixmap. A
+	XSPixmap object is a client/server object and XSImage2Pixmap will
+	update the image in the server and in the client side.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include <xstep.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+XSImage  *image;
+XSPixmap *pixmap;
+
+XSImage *readimage(char *name) {
+
+	XSImage *aux=NULL;
+	FILE 	*fp;
+	char 	tmp[80],format[80],*data;
+	int 	width,height,max;
+	
+	fp=fopen(name,"r");
+	
+	if(fp) {
+
+		fgets(format,80,fp);
+
+		if(!strncmp(format,"P5",2)) {
+		
+			while(fgets(tmp,80,fp)) if(tmp[0]!='#') break;
+			sscanf(tmp,"%d %d",&width,&height);
+			while(fgets(tmp,80,fp)) if(tmp[0]!='#') break;
+			sscanf(tmp,"%d",&max);
+			data=(char *)malloc(width*height);
+			fread(data,1,width*height,fp);
+			fclose(fp);
+		
+			if((aux=XSImageCreate(width,height,data,XS_IMAGE_GRAY))) aux->name=name;
+		}
+				
+		if(!strncmp(format,"P6",2)) {
+		
+			while(fgets(tmp,80,fp)) if(tmp[0]!='#') break;
+			sscanf(tmp,"%d %d",&width,&height);
+			while(fgets(tmp,80,fp)) if(tmp[0]!='#') break;
+			sscanf(tmp,"%d",&max);
+			data=(char *)malloc(width*height*3);
+			fread(data,1,width*height*3,fp);
+			fclose(fp);
+		
+			if((aux=XSImageCreate(width,height,data,XS_IMAGE_RGB24))) aux->name=name;
+		}
+	}
+	return aux;
+}
+
+void w1oncreate(XSWidget *wid) {
+	
+	XSWidgetCreate(wid);
+	
+	pixmap=XSPixmapCreate(wid,image->width,image->height,NULL,XS_PIXMAP_XSHM);
+
+	XSImage2Pixmap(wid,image,pixmap,True);
+
+	XSetWindowBackgroundPixmap(wid->display,wid->window,pixmap->pixmap);
+	XClearWindow(wid->display,wid->window);
+
+	wid->on.create=NULL;
+}
+
+int main(int argc,char **argv) {
+
+	XSWidget *d1,*w1;
+
+	if(!(image=readimage(argv[1]))) return -1;
+
+	fprintf(stderr,
+		"sucess: %dx%d pixels read from %s (%s)\n",
+		image->width,
+		image->height,
+		image->name,
+		image->format==XS_IMAGE_RGB24?"RGB24":"GRAY");
+		
+	d1=XSDesktop(getenv("DISPLAY"),argv,argc);
+	w1=XSWindow(d1,0,0,image->width,image->height,image->name);
+
+	w1->on.event[KeyPress]=XSWindowClose;
+	w1->on.create=w1oncreate;
+	
+	while(XSCheckEvent(d1,XS_BLOCK));
+
+	return 0;
+}

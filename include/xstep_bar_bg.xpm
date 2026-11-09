@@ -1,0 +1,25 @@
+/* XPM */
+static char *xstep_bar_bg_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    16    16       2            1",
+/* colors */
+"i c #505450",
+"k c None",
+/* pixels */
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki",
+"ikikikikikikikik",
+"kikikikikikikiki"
+};

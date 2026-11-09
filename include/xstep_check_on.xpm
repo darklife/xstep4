@@ -1,0 +1,29 @@
+/* XPM */
+static char *xstep_check_on_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    15    15        7            1",
+/* colors */
+". c #000000",
+"# c #505450",
+"a c #606060",
+"b c #a8a8a8",
+"c c #b0b4b0",
+"d c #f8f8f8",
+"e c #f8fcf8",
+/* pixels */
+"eeeeeeeeeeeeee.",
+"ebbbbbbbbbbbb#.",
+"ebbbbbbbbbbbb#.",
+"ebbbbbbbbbe.b#.",
+"ebbbbbbbbe.#b#.",
+"ebbbbbbbe.#bb#.",
+"ebbe.bbe.#bbb#.",
+"ebbe.#e.#bbbb#.",
+"ebbe#e.#bbbbb#.",
+"ebbee.#bbbbbb#.",
+"ebbe.#bbbbbbb#.",
+"ebb.#bbbbbbbb#.",
+"ebbbbbbbbbbbb#.",
+"e#############.",
+"..............."
+};

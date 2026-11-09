@@ -1,0 +1,64 @@
+<html>
+<body bgcolor=white>
+<h1>XSLabel</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSLabel</b>(parent,x,y,width,height,buffer,option)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int  x,y,width,height,option;
+        char *buffer;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSLabel</b> create a label widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with size
+        <b>width,height</b> with a text defined by <b>buffer</b>. This box
+	can be decored by switches actived in <b>option</b> value.
+
+	<p>Valid options are:
+	<blockquote>
+
+	- XS_TEXT_CENTER: centralized text (default).<br>
+ 	- XS_TEXT_LEFT: left aligned text.<br>
+	- XS_TEXT_RIGHT: right aligned text.<br>
+	- XS_TEXT_UP: up aligned text.<br>
+	- XS_TEXT_DOWN: down alined text.<br>
+	- XS_BOX_NONE: no box decoration (default).<br>
+	- XS_BOX_UP: upbox decoration.<br>
+	- XS_BOX_DOWN: downbox decoration.<br>
+	- XS_BOX_UPDOWN: updown decoration.<br>
+	- XS_BOX_HIDEONBORDER: hide decorations on parent border.<br>
+
+	</blockquote>
+
+        <p>All operations of <b>XSEdit</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1,*l1;
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"label example");
+
+	l1=<b>XSLabel</b>(w1,8,8,-8,-40,"label example",XS_BOX_UPDOWN);
+	l1->font=d1->helvetica24b;
+
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK));
+
+	return 0;
+}

@@ -1,0 +1,54 @@
+<html>
+<body bgcolor=white>
+<h1>XSDialog</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSDialog</b>(parent,group,width,height,name)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent,*group;
+        int width,height;
+	char *name;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSDialog</b> create a dialogbox widget in the center the
+        selected <b>parent</b>, linked to a widget group, with size
+        <b>width,height</b>. The <b>name</b> string is drawed in this dialog
+        with a N*XTSTEP-like layout.
+
+        <p>All operations of <b>XSDialog</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+
+void onclickf(<a href="widget.html">XSWidget</a> *wid) {
+
+	<a href="widget.html">XSWidget</a> *w2;
+
+	w2=<b>XSDialog</b>(wid->desktop,wid,400,180,"dialog example");
+	   <a href="button.html">XSButton</a>(w2,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+}
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"dialog example");
+
+	   <a href="button.html">XSButton</a>(w1,-88,-8,72,24,"Dialog",onclickf);
+	   <a href="button.html">XSButton</a>(w1,-8 ,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK));
+
+	return 0;
+}

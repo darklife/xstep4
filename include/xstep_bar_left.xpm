@@ -1,0 +1,19 @@
+/* XPM */
+static char *xstep_bar_left_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"     9     9       3            1",
+/* colors */
+". c #000000",
+"i c #505450",
+"k c None",
+/* pixels */
+"kkkkkkkki",
+"kkkkkki..",
+"kkkki....",
+"kki......",
+"i........",
+"kki......",
+"kkkki....",
+"kkkkkki..",
+"kkkkkkkki"
+};

@@ -1,0 +1,148 @@
+<html>
+<body bgcolor=white>
+<img src="pictures/logo.jpg" border=0>
+
+<h1>XSTEP 4.0 Reference Manual</h1>
+<h6>XSTEP is copyright (c) 2001 by Marcelo Samsoniuk and contributors.<br>
+NeXTSTEP is a trademark of Apple Computer Inc.<br>
+All rights reserved.</h6>
+
+<p><b>INTRODUCTION</b>
+<blockquote>
+
+	<p>This manual is the basic reference for version 4.0 of XSTEP
+	toolkit for X, a library of widgets designed to enable programmers
+	to write complex applications in C language with the look and feel
+	of NeXTSTEP* graphic interface. 
+
+	<p>The main target for this manual is programmers with good
+	knowledge of C language and basic X library operation. XSTEP is a
+	open and flexible widget library: X library functions and X
+	extensions can be used without restrictions.
+</blockquote>
+<p><b>DISPLAYS AND SCREENS</b>
+<blockquote>
+
+	<p>This version of XSTEP can work with multiple displays with
+	multiple screens. A <b>display</b> is a network graphic server, with
+	one or more graphic card and one mouse (or any other pointer device)
+	and a keyboard. One display must have one or more monitors attached
+	in one or more graphic cards. The visible portion of image in these
+	monitors are called <b>screens</b>.
+
+	<p>For example, in a network workstation you have two monitors
+	attached in two graphic cards, one mouse and one keyboard. A graphic
+	server called X server is running in this machine and allow TCP
+	connections in the port 6000. In the X notion, this machine have one
+	display in the port 6000 (hostname:0) and two screens (hostname:0.0
+	and hostname:0.1).
+
+	<p>For XSTEP, a screen is called desktop and have authority to work
+	in all pixels visible in your monitor. You can have many desktops as
+	you have screens and the function <a href="desktop.html">XSDesktop</a>
+	will return to you a double linked list of all screens available in
+	a specific display.
+
+</blockquote>
+<p><b>WIDGETS</b>
+<blockquote>
+
+	<p>The X library is a library for windows and the XSTEP toolkit is a
+	library of widgets. All XSTEP widgets are in fact windows, with
+	distinct code to perform automated tasks, like redraw a button when
+	you click in it or cache multiple exposed areas to redraw all in a
+	single pass. Any widget, except a screen, must be based in other
+	widget, called parent. When you create a new widget inside the
+	parent widget, all attributes are copyed and small modifications
+	are make to enable a new functionality.
+
+	<p>For example, when you create a button inside a window, the
+	function <a href="button.html">XSButton</a> will copy the window
+	widget to a new button widget, then will set a new event mask with
+	functions to manage area exposures, button press and button release
+	events. All other attributes are like the parent window. This new
+	button widget is then attached to a child stack in the parent
+	widget. In the next <a href="event.html">XSCheckEvent</a>, this stack
+	will be processed and a new window will be created in the X server
+	and this window will generate events. These events have a specific
+	target, a <b>window id</b>, and will active callback functions in
+	the widget with the correct window id.
+
+	<p>All widgets must have a parent, except screens: screens are
+	already created and all informations in the screen widget are based
+	in a real object in the X server (the physical structure of a
+	screens can't be destroyed or changed).
+
+</blockquote>
+<p><b>WIDGETS</b>
+<blockquote>
+
+	<li><a href="desktop.html">	XSDesktop</a><br>
+	<li><a href="window.html">	XSWindow, XSWindowClose</a><br>
+	<li><a href="button.html">	XSButton</a><br>
+	<li><a href="check.html">		XSCheck</a><br>
+	<li><a href="radio.html">		XSRadio</a><br>
+	<li><a href="tune.html">		XSTune</a><br>
+	<li><a href="popup.html">		XSPopup</a><br>
+	<li><a href="edit.html">		XSEdit</a><br>
+	<li><a href="label.html">		XSLabel</a><br>
+	<li><a href="scroll.html">	XSScroll</a><br>
+	<li><a href="dialog.html">	XSDialog</a><br>
+	<li>XSMenu<br>
+	<li>XSTextScroll<br>
+	
+
+</blockquote>
+<p><b>PIXMAP FUNCTIONS</b>
+<blockquote>
+
+	<li>XSPixmapUpdate<br>
+	<li>XSPixmapDraw<br>
+	<li>XSPixmapCreate<br>
+	<li>XSPixmapDestroy<br>
+	<li>XSPixmapCreateXPM<br>
+	<li>XSPixmapCreateXPMF<br>
+
+</blockquote>
+<p><b>IMAGE FUNCTIONS</b>
+<blockquote>
+
+	<li>XSImageCopy<br>
+	<li>XSImageRGB24Swap<br>
+	<li>XSImageGamma<br>
+	<li>XSImageInverse<br>
+	<li>XSImageClear<br>
+	<li>XSImageCreate<br>
+	<li>XSImageDestroy<br>
+	<li>XSImage2Pixmap<br>
+
+</blockquote>
+<p><b>TEXT FUNCTIONS</b>
+<blockquote>	
+
+	<li>XSCreateText<br>
+	<li>XSWrapText<br>
+	<li>XSDrawText<br>
+	
+
+</blockquote>
+<p><b>MISC FUNCTIONS</b>
+<blockquote>
+
+	<li><a href="event.html">		XSCheckEvent</a><br>
+	<li><a href="color.html">		XSColor, XSNamedColor</a><br>
+	<li>XSWidgetCreate<br>
+	<li>XSDrawBox<br>
+		
+
+</blockquote>
+<p><b>XSTEP TYPEDEFS</b>
+<blockquote>
+
+	<li><a href="widget.html">	XSWidget</a><br>
+	<li><a href="text.html">		XSText</a><br>
+	<li><a href="pixmap.html">	XSPixmap</a><br>
+	<li><a href="image.html">		XSImage</a><br>
+	<li><a href="global.html">	XSGlobal</a><br>
+
+</blockquote>

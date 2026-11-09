@@ -1,0 +1,61 @@
+<html>
+<body bgcolor=white>
+<h1>XSRadio</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSRadio</b>(parent,x,y,width,height,name,data,mask)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int  x,y,width,height;
+        char *name;
+        int  *data,mask;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSRadio</b> create a radiobox widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with size
+        <b>width,height</b> and label <b>name</b>. When mouse button is
+        pressed and released inside this widget, a internal status is
+        inverted. 
+
+        <p>If internal status is true, the value of <b>mask</b> will be
+        copied in <b>*data</b>. The value of <b>mask</b> must be a unique
+	32 bit value and a 32 bit integer can be shared by many radioboxes,
+	but only one will have internal status true.
+
+        <p>All operations of <b>XSRadio</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+
+	int radio=1;
+
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"radio example");
+
+	<b>XSRadio</b>(w1,8,8+0*24,200,21,"680x0",&radio,1);
+	<b>XSRadio</b>(w1,8,8+1*24,200,21,"80x86",&radio,2);
+
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK)) {
+
+		if(radio==1) printf("radio value is '680x0'\n"); 
+		if(radio==2) printf("radio value is '80x86'\n");    
+	}                                        
+	return 0;
+}

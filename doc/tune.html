@@ -1,0 +1,50 @@
+<html>
+<body bgcolor=white>
+<h1>XSTune</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSTune</b>(parent,x,y,min,max,data)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int  x,y,min,max,*data;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSTune</b> create a fine tune widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with fixed size
+        33x16. When you click in the up arrow, the variable <b>*data</b>
+	will be incremented upto <b>max</b> value; when you click in the 
+	down arrow, the variable <b>*data</b> will be decremented downto
+	<b>min</b> value. Only integer values are supported and the variable
+	only will be incremented or decremented by 1.
+ 
+        <p>All operations of <b>XSTune</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+#include &lt;stdio.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+	int		pointer=0;
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"popup example");
+	   <b>XSTune</b>(w1,8,8,0,100,&pointer);
+	   <a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK))
+		printf("pointer value: %d\n",pointer);
+
+	return 0;
+}

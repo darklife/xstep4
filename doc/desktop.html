@@ -1,0 +1,59 @@
+<html>
+<body bgcolor=white>
+<h1>XSDesktop</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	wid=<b>XSDesktop</b>(displayname,argv,argc)
+
+	<a href="widget.html">XSWidget</a> *wid;
+	int  argc;
+	char **argv,*displayname;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+	<p><b>XSDesktop</b> open a network connection to display named by
+	<b>displayname</b> and scan for active screens. All active screens
+	are returned in a linked list of widgets and all rootwindow are
+	maped like any standard widget, see the <a href="widget.html">XSWidget</a>
+	definitions for more detail about display and screen informations.
+
+	<p>The <b>displayname</b> can be NULL, but isn't recomended. You can
+	parse your <b>argv</b> for a parameter like "-dDISPLAY" or 
+	"-display DISPLAY" or force to any specific display, like ":0". If
+	unsure, use getenv("DISPLAY").
+
+	<p>All operations of <b>XSDesktop</b> in the X server are immediate.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*d2;
+	int i;
+
+	d2=d1=<b>XSDesktop</b>(getenv("DISPLAY"),argv,argc);
+
+	while(d1->last) d1=d1->last;
+
+	for(i=0;d1;i++) {
+
+		printf("display %s, screen %d: %dx%d pixels, depth %d %s\n",
+			d1->name,i,d1->width,d1->height,d1->depth,
+			d1==d2?"(default screen)":"");
+
+		d1=d1->next;
+	}
+
+	return 0;
+}
+

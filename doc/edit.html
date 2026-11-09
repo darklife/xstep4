@@ -1,0 +1,50 @@
+<html>
+<body bgcolor=white>
+<h1>XSEdit</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSEdit</b>(parent,x,y,width,height,buffer,size,flags)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int  x,y,width,height,size,flags;
+        char *buffer;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSEdit</b> create a editbox widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with size
+        <b>width,height</b>. When active, the text stored in <b>buffer</b>
+	string can be edited in any way, with character insertion limited by
+	<b>size</b> value, and others <b>flags</b> (like text align and
+	single line property).
+
+        <p>All operations of <b>XSEdit</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+	
+	char buffer[256]="XSEdit:\n\n\tEdit your text here!";
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"edit example");
+
+	<b>XSEdit</b>(w1,8,8,-8,-40,buffer,256,XS_TEXT_LEFT|XS_TEXT_UP);
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK));
+
+	return 0;
+}

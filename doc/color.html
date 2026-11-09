@@ -1,0 +1,63 @@
+<html>
+<body bgcolor=white>
+<h1>XSColor, XSNamedColor</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+	pixel=<b>XSColor</b>(wid,red,green,blue)
+
+	<a href="widget.html">XSWidget</a> *wid;
+	unsigned int pixel,red,gree,blue; 
+
+	pixel=<b>XSNamedColor</b>(wid,colorname)
+
+	<a href="widget.html">XSWidget</a> *wid;
+	unsigned int pixel;
+	char *colorname;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+	<p><b>XSColor</b> calculate or query the screen for the more
+	aproximated color defined by values <b>red</b>, <b>green</b> and
+	<b>blue</b>. For depths 24, 16 and 15, a fast color calculation is
+	returned (this operation can be unsafe in mixed big/litle endian
+	networks), for any other depth colors are allocated in the screen.
+
+	<p><b>XSNamedColor</b> will try to convert a ASCII color name to
+	<b>XSColor</b>. A list of valid colornames is available <a
+	href="rgb.html">here</a>. The RGB value returned by
+	<b>XSNamedColor</b> is precise only in 24-bit depths and an
+	aproximation in any other depth.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1,*l1;
+	
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"color example");
+	
+	l1=<a href="label.html">XSLabel</a>(w1,8+108*0,8,100,100,"red",0);
+	l1->bgcolor=XSNamedColor(d1,"red");
+
+	l1=<a href="label.html">XSLabel</a>(w1,8+108*1,8,100,100,"green",0);
+	l1->bgcolor=XSNamedColor(d1,"green");
+
+	l1=<a href="label.html">XSLabel</a>(w1,8+108*2,8,100,100,"blue",0);
+	l1->bgcolor=XSNamedColor(d1,"blue");
+
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<b>XSWindowClose</b>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK));
+
+	return 0;
+}

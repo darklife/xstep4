@@ -1,0 +1,64 @@
+<html>
+<body bgcolor=white>
+<h1>XSCheck</h1>
+
+<p><b>SYNTAX</b>
+<pre>
+        wid=<b>XSCheck</b>(parent,x,y,width,height,name,data,mask)
+
+        <a href="widget.html">XSWidget</a> *wid,*parent;
+        int  x,y,width,height;
+        char *name;
+	int  *data,mask;
+</pre>
+
+<p><b>DESCRIPTION</b>
+<blockquote>
+
+        <p><b>XSCheck</b> create a checkbox widget inside the selected
+        <b>parent</b>, in the position <b>x,y</b> with size
+        <b>width,height</b> and label <b>name</b>. When mouse button is
+        pressed and released inside this widget, a internal status is
+	inverted. 
+
+	<p>If internal status is true, all bits in <b>mask</b> will be
+	actived in <b>*data</b>. If internal status is false, all bits in
+	<b>mask</b> will be deactived in <b>*data</b>. If <b>mask</b> have
+	a unique 1 bit value, you can share one single 32 bit integer 
+	with 32 checkbox widgets.
+
+        <p>All operations of <b>XSCheck</b> in the X server are delayed
+        until <b><a href="event.html">XSCheckEvent</a></b> is executed.
+
+</blockquote>
+
+<p><b>Example</b>
+<blockquote>
+<pre>
+#include &lt;xstep.h>
+#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+int main(int argc,char **argv) {
+
+	<a href="widget.html">XSWidget</a> *d1,*w1;
+
+	int check=0;
+
+	d1=<a href="desktop.html">XSDesktop</a>(getenv("DISPLAY"),argv,argc);
+	w1=<a href="window.html">XSWindow</a>(d1,0,0,400,400,"check example");
+
+	<b>XSCheck</b>(w1,8,8+0*24,200,21,"680x0",&check,1);
+	<b>XSCheck</b>(w1,8,8+1*24,200,21,"80x86",&check,2);
+
+	<a href="button.html">XSButton</a>(w1,-8,-8,72,24,"Close",<a href="window.html">XSWindowClose</a>);
+	
+	while(<a href="event.html">XSCheckEvent</a>(d1,XS_BLOCK)) {
+
+		if(check==0) printf("check value is ''\n");
+		if(check==1) printf("check value is '680x0'\n");
+		if(check==2) printf("check value is '80x86'\n");
+		if(check==3) printf("check value is '680x0' and '80x86'\n");
+	}
+	return 0;
+}
